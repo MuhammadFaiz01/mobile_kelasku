@@ -13,17 +13,6 @@ class ProfilePage extends StatelessWidget {
     final lecturer = MockData.users.firstWhere((user) => user.role == UserRole.dosen);
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text(
-          'Profil Dosen',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 40, 16, 16),
         child: Column(
@@ -47,7 +36,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
             // Info Card
             Card(

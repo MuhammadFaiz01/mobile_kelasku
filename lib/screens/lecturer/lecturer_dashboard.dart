@@ -133,7 +133,7 @@ class _HomeTab extends StatelessWidget {
         if (user == null) return const SizedBox.shrink();
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 32, 16, 16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
