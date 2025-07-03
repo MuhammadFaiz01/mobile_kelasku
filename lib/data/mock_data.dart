@@ -106,8 +106,8 @@ class MockData {
       mataKuliah: 'Sistem Operasi Linux',
       dosen: 'Dr. Andi Wijaya, M.Kom',
       ruangan: 'Online Meeting',
-      waktuMulai: DateTime.now().add(const Duration(hours: 3)),
-      waktuSelesai: DateTime.now().add(const Duration( hours: 6)),
+      waktuMulai: DateTime.now().add(const Duration(hours: 2)),
+      waktuSelesai: DateTime.now().add(const Duration(hours: 3)),
       status: ScheduleStatus.online,
       kelas: '4SI1',
       semester: 'Genap 2023/2024',
@@ -161,6 +161,15 @@ class MockData {
       method: AttendanceMethod.qr_code,
       notes: 'Tidak hadir tanpa keterangan',
     ),
+    Attendance(
+      id: 'att6',
+      scheduleId: 'sch6',
+      studentId: '1',
+      timestamp: DateTime.now().subtract(const Duration(days: 2)),
+      status: AttendanceStatus.hadir,
+      method: AttendanceMethod.face_recognition,
+      notes: 'Hadir via online',
+    ),
   ];
 
   // Login credentials for demo
@@ -176,7 +185,9 @@ class MockData {
 
   static User? getUserByEmail(String email) {
     try {
-      return users.firstWhere((user) => user.email.contains(email.split('@')[0]));
+      return users.firstWhere(
+        (user) => user.email.contains(email.split('@')[0]),
+      );
     } catch (e) {
       return null;
     }

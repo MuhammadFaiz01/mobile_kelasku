@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/schedule_provider.dart';
 import 'providers/attendance_provider.dart';
+import 'providers/student_attendance_provider.dart'; // ⬅️ import provider
 import 'screens/splash_screen.dart';
 
 void main() {
@@ -14,11 +15,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ScheduleProvider()),
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
+        ChangeNotifierProvider(create: (_) => StudentAttendanceProvider()), // ⬅️ penting
       ],
       child: MaterialApp(
         title: 'Kelasku - BSI',

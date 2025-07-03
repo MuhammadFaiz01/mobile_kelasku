@@ -62,6 +62,8 @@ enum AttendanceStatus {
   hadir,
   terlambat,
   tidak_hadir,
+  sakit,
+  izin,
 }
 
 enum AttendanceMethod {

@@ -257,6 +257,16 @@ class _AttendanceCard extends StatelessWidget {
         statusIcon = Icons.access_time;
         statusText = 'Terlambat';
         break;
+      case AttendanceStatus.sakit:
+        statusColor = Colors.lightGreen;
+        statusIcon = Icons.sick;
+        statusText = 'Sakit';
+        break;
+      case AttendanceStatus.izin:
+        statusColor = Colors.lightGreen;
+        statusIcon = Icons.person_off;
+        statusText = 'Izin';
+        break;
       case AttendanceStatus.tidak_hadir:
         statusColor = Colors.red;
         statusIcon = Icons.cancel;

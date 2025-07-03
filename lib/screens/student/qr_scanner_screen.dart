@@ -17,22 +17,22 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
-  MobileScannerController cameraController = MobileScannerController();
+  final MobileScannerController cameraController = MobileScannerController();
   bool _isScanning = true;
   bool _hasPermission = false;
   String? _scanResult;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermission();
+  }
 
   @override
   void reassemble() {
     super.reassemble();
     cameraController.stop();
     cameraController.start();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _checkPermission();
   }
 
   @override
@@ -50,7 +50,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   void _onDetect(BarcodeCapture capture) {
     if (_isScanning && capture.barcodes.isNotEmpty) {
-      final String code = capture.barcodes.first.rawValue ?? '';
+      final code = capture.barcodes.first.rawValue ?? '';
       setState(() {
         _isScanning = false;
         _scanResult = code;
@@ -62,13 +62,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   void _handleQRCode(String code) async {
     if (code.isEmpty) return;
 
-    // Validate QR Code format
     if (!code.startsWith('KELASKU_ATTENDANCE_')) {
       _showErrorDialog('QR Code tidak valid untuk absensi Kelasku');
       return;
     }
 
-    // Extract schedule ID from QR code
     final parts = code.split('_');
     if (parts.length < 3) {
       _showErrorDialog('Format QR Code tidak valid');
@@ -81,7 +79,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       return;
     }
 
-    // Submit attendance
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
 
@@ -98,18 +95,17 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     }
   }
 
-
-
   void _showSuccessDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Row(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 28),
-            SizedBox(width: 8),
-            Text('Berhasil!'),
+            const Icon(Icons.check_circle, color: Colors.green, size: 28),
+            const SizedBox(width: 8),
+            const Text('Berhasil!'),
           ],
         ),
         content: Column(
@@ -118,18 +114,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           children: [
             const Text('Absensi berhasil dicatat untuk:'),
             const SizedBox(height: 8),
+            Text(widget.schedule.mataKuliah, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(
-              widget.schedule.mataKuliah,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              'Waktu: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+              style: const TextStyle(color: Colors.grey),
             ),
-            Text('Waktu: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}'),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Go back to dashboard
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
             },
             child: const Text('OK'),
           ),
@@ -142,11 +138,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
           children: [
-            Icon(Icons.error, color: Colors.red, size: 28),
-            SizedBox(width: 8),
-            Text('Error'),
+            const Icon(Icons.error, color: Colors.red, size: 28),
+            const SizedBox(width: 8),
+            const Text('Error'),
           ],
         ),
         content: Text(message),
@@ -174,7 +171,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   void _simulateQRScan() {
-    // Simulate scanning a valid QR code for demo purposes
     final demoQRCode = 'KELASKU_ATTENDANCE_${widget.schedule.id}_${DateTime.now().millisecondsSinceEpoch}';
     _handleQRCode(demoQRCode);
   }
@@ -183,43 +179,15 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Scan QR Code',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF1E3A8A),
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Scan QR Code', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1E3A8A),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF1E3A8A)),
       ),
       body: Column(
         children: [
-          // Schedule Info
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: Colors.grey[100],
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.schedule.mataKuliah,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${widget.schedule.dosen} • ${widget.schedule.ruangan}',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-                Text(
-                  widget.schedule.formattedTime,
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-          // QR Scanner
+          _buildScheduleInfo(),
           Expanded(
             flex: 4,
             child: Stack(
@@ -233,53 +201,81 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                         child: Text(
                           'Izin kamera diperlukan untuk scan QR',
                           textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
                         ),
                       ),
                 if (!_isScanning)
                   Container(
                     color: Colors.black54,
                     child: const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
+                      child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                     ),
                   ),
               ],
             ),
           ),
-          // Instructions
-          Expanded(
-            flex: 1,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Arahkan kamera ke QR Code yang ditampilkan dosen',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Demo button for testing
-                  ElevatedButton(
-                    onPressed: !_isScanning ? null : _simulateQRScan,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('Demo: Simulasi Scan'),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _buildInstructions(),
         ],
       ),
+    );
+  }
+
+  Widget _buildScheduleInfo() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(widget.schedule.mataKuliah, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        Row(children: [
+          const Icon(Icons.person, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Text(widget.schedule.dosen, style: const TextStyle(color: Colors.grey)),
+        ]),
+        const SizedBox(height: 4),
+        Row(children: [
+          const Icon(Icons.location_on, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Text(widget.schedule.ruangan, style: const TextStyle(color: Colors.grey)),
+        ]),
+        const SizedBox(height: 4),
+        Row(children: [
+          const Icon(Icons.access_time, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Text(widget.schedule.formattedTime, style: const TextStyle(color: Colors.grey)),
+        ]),
+      ]),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      color: Colors.white,
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        const Text(
+          'Arahkan kamera ke QR Code yang ditampilkan dosen',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton.icon(
+          onPressed: !_isScanning ? null : _simulateQRScan,
+          icon: const Icon(Icons.qr_code_2),
+          label: const Text('Simulasi Scan'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+        ),
+      ]),
     );
   }
 }

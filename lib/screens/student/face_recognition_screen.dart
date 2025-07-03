@@ -16,8 +16,7 @@ class FaceRecognitionScreen extends StatefulWidget {
   State<FaceRecognitionScreen> createState() => _FaceRecognitionScreenState();
 }
 
-class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
-    with TickerProviderStateMixin {
+class _FaceRecognitionScreenState extends State<FaceRecognitionScreen> with TickerProviderStateMixin {
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _isProcessing = false;
@@ -28,7 +27,6 @@ class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
   late AnimationController _progressAnimationController;
   late Animation<double> _progressAnimation;
 
-  // ───────────────────────────────────────────── init ──
   @override
   void initState() {
     super.initState();
@@ -45,61 +43,37 @@ class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
           orElse: () => cameras.first,
         );
 
-        _cameraController = CameraController(
-          frontCamera,
-          ResolutionPreset.medium,
-        );
+        _cameraController = CameraController(frontCamera, ResolutionPreset.medium);
         await _cameraController!.initialize();
 
-        if (mounted) {
-          setState(() => _isCameraInitialized = true);
-        }
+        if (mounted) setState(() => _isCameraInitialized = true);
       }
     } catch (_) {
-      if (mounted) {
-        _showErrorDialog(
-            'Gagal mengakses kamera. Pastikan izin kamera telah diberikan.');
-      }
+      if (mounted) _showErrorDialog('Gagal mengakses kamera. Pastikan izin kamera telah diberikan.');
     }
   }
 
   void _setupAnimations() {
-    _scanAnimationController =
-        AnimationController(duration: const Duration(seconds: 2), vsync: this);
-    _scanAnimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
-      parent: _scanAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _scanAnimationController = AnimationController(duration: const Duration(seconds: 2), vsync: this);
+    _scanAnimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _scanAnimationController, curve: Curves.easeInOut));
     _scanAnimationController.repeat(reverse: true);
 
-    _progressAnimationController =
-        AnimationController(duration: const Duration(seconds: 3), vsync: this);
-    _progressAnimation =
-        Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
-      parent: _progressAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _progressAnimationController = AnimationController(duration: const Duration(seconds: 3), vsync: this);
+    _progressAnimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _progressAnimationController, curve: Curves.easeInOut));
   }
 
-  // ─────────────────────────────── kamera helper ──
   Widget _buildCamera() {
     if (!_isCameraInitialized || _cameraController == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Hitung scale agar preview meng-cover layar tanpa merusak rasio
     final size = MediaQuery.of(context).size;
     var scale = size.aspectRatio * _cameraController!.value.aspectRatio;
     if (scale < 1) scale = 1 / scale;
 
-    return Transform.scale(
-      scale: scale,
-      alignment: Alignment.center,
-      child: CameraPreview(_cameraController!),
-    );
+    return Transform.scale(scale: scale, alignment: Alignment.center, child: CameraPreview(_cameraController!));
   }
 
-  // ─────────────────────────── face recognition ──
   void _startFaceRecognition() async {
     if (_isProcessing) return;
     setState(() => _isProcessing = true);
@@ -107,7 +81,6 @@ class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
     _scanAnimationController.stop();
     _progressAnimationController.forward();
 
-    // simulasi proses 3 detik
     await Future.delayed(const Duration(seconds: 3));
 
     if (!mounted) return;
@@ -138,17 +111,17 @@ class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
     }
   }
 
-  // ───────────────────────────────────── dialogs ──
   void _showSuccessDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        title: const Row(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 28),
-            SizedBox(width: 8),
-            Text('Berhasil!'),
+            const Icon(Icons.check_circle, color: Colors.green, size: 28),
+            const SizedBox(width: 8),
+            const Text('Berhasil!'),
           ],
         ),
         content: Column(
@@ -157,19 +130,18 @@ class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
           children: [
             const Text('Wajah berhasil dikenali dan absensi tercatat untuk:'),
             const SizedBox(height: 8),
-            Text(widget.schedule.mataKuliah,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(widget.schedule.mataKuliah, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(
-              'Waktu: ${DateTime.now().hour.toString().padLeft(2, '0')}:'
-              '${DateTime.now().minute.toString().padLeft(2, '0')}',
+              'Waktu: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+              style: const TextStyle(color: Colors.grey),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // dialog
-              Navigator.of(context).pop(); // halaman FaceRecognition
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
             },
             child: const Text('OK'),
           ),
@@ -182,11 +154,12 @@ class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Row(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
           children: [
-            Icon(Icons.error, color: Colors.red, size: 28),
-            SizedBox(width: 8),
-            Text('Error'),
+            const Icon(Icons.error, color: Colors.red, size: 28),
+            const SizedBox(width: 8),
+            const Text('Error'),
           ],
         ),
         content: Text(msg),
@@ -215,7 +188,6 @@ class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
     );
   }
 
-  // ───────────────────────────────────────── dispose ──
   @override
   void dispose() {
     _cameraController?.dispose();
@@ -224,177 +196,161 @@ class _FaceRecognitionScreenState extends State<FaceRecognitionScreen>
     super.dispose();
   }
 
-  // ────────────────────────────────────────── UI ──
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Face Recognition', style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF1E3A8A),
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Face Recognition', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1E3A8A),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF1E3A8A)),
       ),
       body: Column(
         children: [
-          // Info jadwal
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: Colors.grey[100],
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.schedule.mataKuliah,
-                    style:
-                        const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text('${widget.schedule.dosen} • Online Class',
-                    style: TextStyle(color: Colors.grey[600])),
-                Text(widget.schedule.formattedTime,
-                    style: TextStyle(color: Colors.grey[600])),
-              ],
-            ),
-          ),
+          _buildScheduleInfo(),
+          Expanded(flex: 4, child: _buildCameraSection()),
+          _buildActionSection(),
+        ],
+      ),
+    );
+  }
 
-          // Camera preview + overlay
-          Expanded(
-            flex: 4,
+  Widget _buildScheduleInfo() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(widget.schedule.mataKuliah, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 6),
+        Row(children: [
+          const Icon(Icons.person, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Text(widget.schedule.dosen, style: const TextStyle(color: Colors.grey)),
+        ]),
+        const SizedBox(height: 4),
+        Row(children: [
+          const Icon(Icons.access_time, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Text(widget.schedule.formattedTime, style: const TextStyle(color: Colors.grey)),
+        ]),
+      ]),
+    );
+  }
+
+  Widget _buildCameraSection() {
+    return Container(
+      width: double.infinity,
+      color: Colors.black,
+      child: Stack(
+        children: [
+          Center(child: _buildCamera()),
+          Center(
             child: Container(
-              width: double.infinity,
-              color: Colors.black,
-              child: Stack(
-                children: [
-                  // preview
-                  Center(child: _buildCamera()),
-
-                  // overlay kotak + animasi
+              width: 250,
+              height: 300,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _isRecognitionComplete
+                      ? Colors.green
+                      : _isProcessing
+                          ? Colors.orange
+                          : const Color(0xFF1E3A8A),
+                  width: 3,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Stack(children: [
+                if (!_isProcessing)
+                  AnimatedBuilder(
+                    animation: _scanAnimation,
+                    builder: (_, __) => Positioned(
+                      top: _scanAnimation.value * 250,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 2,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.transparent, Color(0xFF1E3A8A), Colors.transparent],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_isProcessing)
                   Center(
-                    child: Container(
-                      width: 250,
-                      height: 300,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: _isRecognitionComplete
-                              ? Colors.green
-                              : _isProcessing
-                                  ? Colors.orange
-                                  : const Color(0xFF1E3A8A),
-                          width: 3,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedBuilder(
+                          animation: _progressAnimation,
+                          builder: (_, __) => CircularProgressIndicator(
+                            value: _progressAnimation.value,
+                            valueColor: const AlwaysStoppedAnimation(Colors.orange),
+                            strokeWidth: 4,
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Stack(
-                        children: [
-                          if (!_isProcessing)
-                            AnimatedBuilder(
-                              animation: _scanAnimation,
-                              builder: (_, __) => Positioned(
-                                top: _scanAnimation.value * 250,
-                                left: 0,
-                                right: 0,
-                                child: Container(
-                                  height: 2,
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.transparent,
-                                        Color(0xFF1E3A8A),
-                                        Colors.transparent
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          if (_isProcessing)
-                            Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  AnimatedBuilder(
-                                    animation: _progressAnimation,
-                                    builder: (_, __) =>
-                                        CircularProgressIndicator(
-                                      value: _progressAnimation.value,
-                                      valueColor: const AlwaysStoppedAnimation(
-                                          Colors.orange),
-                                      strokeWidth: 4,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  const Text('Mengenali wajah...',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ),
-                          if (_isRecognitionComplete)
-                            const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.check_circle,
-                                      color: Colors.green, size: 64),
-                                  SizedBox(height: 16),
-                                  Text('Wajah Dikenali!',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
+                        const SizedBox(height: 16),
+                        const Text('Mengenali wajah...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                if (_isRecognitionComplete)
+                  const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 64),
+                        SizedBox(height: 16),
+                        Text('Wajah Dikenali!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+              ]),
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // Tombol & keterangan
-          Expanded(
-            flex: 1,
-            child: Container(
+  Widget _buildActionSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _isProcessing
+                ? 'Sedang memproses...'
+                : _isRecognitionComplete
+                    ? 'Absensi berhasil dicatat!'
+                    : 'Posisikan wajah Anda di dalam frame dan tekan tombol untuk memulai',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          if (!_isProcessing && !_isRecognitionComplete)
+            SizedBox(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _isProcessing
-                        ? 'Sedang memproses...'
-                        : _isRecognitionComplete
-                            ? 'Absensi berhasil dicatat!'
-                            : 'Posisikan wajah Anda di dalam frame dan tekan tombol untuk memulai',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  if (!_isProcessing && !_isRecognitionComplete)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed:
-                            _isCameraInitialized ? _startFaceRecognition : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E3A8A),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: const Text('Mulai Pengenalan Wajah',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                ],
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isCameraInitialized ? _startFaceRecognition : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Mulai Pengenalan Wajah', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
-          ),
         ],
       ),
     );

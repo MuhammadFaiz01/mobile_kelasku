@@ -6,6 +6,7 @@ import '../../models/schedule.dart';
 import '../../models/user.dart';
 import '../auth/login_screen.dart';
 import 'qr_generator_screen.dart';
+import 'profile.dart';
 
 class LecturerDashboard extends StatefulWidget {
   const LecturerDashboard({super.key});
@@ -22,10 +23,16 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final scheduleProvider = Provider.of<ScheduleProvider>(context, listen: false);
-      
+      final scheduleProvider = Provider.of<ScheduleProvider>(
+        context,
+        listen: false,
+      );
+
       if (authProvider.currentUser != null) {
-        scheduleProvider.loadSchedules(UserRole.dosen, authProvider.currentUser!.id);
+        scheduleProvider.loadSchedules(
+          UserRole.dosen,
+          authProvider.currentUser!.id,
+        );
       }
     });
   }
@@ -67,41 +74,49 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
     final List<Widget> pages = [
       const _HomeTab(),
       const _ScheduleTab(),
+      const ProfilePage(),
     ];
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: const Text(
-          'KELASKU - DOSEN',
+          'KELASKU',
           style: TextStyle(
+            color: Color(0xFF1E3A8A),
             fontWeight: FontWeight.bold,
-            color: Colors.white,
           ),
         ),
-        backgroundColor: const Color(0xFF1E3A8A),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: _logout,
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.logout, color: Color(0xFF1E3A8A)),
+        //     onPressed: _logout,
+        //   ),
+        // ],
       ),
       body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        currentIndex: _selectedIndex,
+        selectedItemColor: const Color(0xFF1E3A8A),
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
             label: 'Beranda',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
+            icon: Icon(Icons.schedule_outlined),
             label: 'Jadwal',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profil',
+          ),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF1E3A8A),
-        onTap: _onItemTapped,
       ),
     );
   }
@@ -118,7 +133,7 @@ class _HomeTab extends StatelessWidget {
         if (user == null) return const SizedBox.shrink();
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 32, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -128,27 +143,32 @@ class _HomeTab extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+                    colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Selamat Datang,',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       user.name,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -164,7 +184,8 @@ class _HomeTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // Stats Cards
+
+              // Stats
               Row(
                 children: [
                   Expanded(
@@ -186,16 +207,15 @@ class _HomeTab extends StatelessWidget {
                   ),
                 ],
               ),
+
               const SizedBox(height: 24),
-              // Today's Schedule
+
               const Text(
                 'Jadwal Hari Ini',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
+
               if (scheduleProvider.isLoading)
                 const Center(child: CircularProgressIndicator())
               else if (scheduleProvider.getTodaySchedules().isEmpty)
@@ -204,22 +224,15 @@ class _HomeTab extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Column(
                     children: [
-                      Icon(
-                        Icons.event_busy,
-                        size: 48,
-                        color: Colors.grey,
-                      ),
+                      Icon(Icons.event_busy, size: 48, color: Colors.grey),
                       SizedBox(height: 8),
                       Text(
                         'Tidak ada jadwal hari ini',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                     ],
                   ),
@@ -249,7 +262,6 @@ class _HomeTab extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('QR Code hanya tersedia untuk kelas offline'),
-          backgroundColor: Colors.orange,
         ),
       );
     }
@@ -263,18 +275,13 @@ class _ScheduleTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ScheduleProvider>(
       builder: (context, scheduleProvider, child) {
-        if (scheduleProvider.isLoading) {
+        if (scheduleProvider.isLoading)
           return const Center(child: CircularProgressIndicator());
-        }
-
-        if (scheduleProvider.schedules.isEmpty) {
-          return const Center(
-            child: Text('Tidak ada jadwal tersedia'),
-          );
-        }
+        if (scheduleProvider.schedules.isEmpty)
+          return const Center(child: Text('Tidak ada jadwal tersedia'));
 
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 16, 16, 16),
           itemCount: scheduleProvider.schedules.length,
           itemBuilder: (context, index) {
             final schedule = scheduleProvider.schedules[index];
@@ -299,7 +306,6 @@ class _ScheduleTab extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('QR Code hanya tersedia untuk kelas offline'),
-          backgroundColor: Colors.orange,
         ),
       );
     }
@@ -325,23 +331,19 @@ class _StatCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 32,
-          ),
-          const SizedBox(height: 8),
+          Icon(icon, color: color, size: 30),
+          const SizedBox(height: 10),
           Text(
             value,
             style: TextStyle(
@@ -350,12 +352,10 @@ class _StatCard extends StatelessWidget {
               color: color,
             ),
           ),
+          const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 13, color: Colors.black54),
           ),
         ],
       ),
@@ -374,7 +374,8 @@ class _LecturerScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isToday = schedule.waktuMulai.day == DateTime.now().day &&
+    final isToday =
+        schedule.waktuMulai.day == DateTime.now().day &&
         schedule.waktuMulai.month == DateTime.now().month &&
         schedule.waktuMulai.year == DateTime.now().year;
 
@@ -383,15 +384,15 @@ class _LecturerScheduleCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: isToday
             ? Border.all(color: const Color(0xFF1E3A8A), width: 2)
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -410,21 +411,26 @@ class _LecturerScheduleCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: schedule.status == ScheduleStatus.online
-                      ? Colors.green[100]
-                      : Colors.blue[100],
+                      ? Colors.green[50]
+                      : Colors.blue[50],
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  schedule.status == ScheduleStatus.online ? 'Online' : 'Offline',
+                  schedule.status == ScheduleStatus.online
+                      ? 'Online'
+                      : 'Offline',
                   style: TextStyle(
                     fontSize: 12,
                     color: schedule.status == ScheduleStatus.online
                         ? Colors.green[700]
                         : Colors.blue[700],
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -433,34 +439,25 @@ class _LecturerScheduleCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.class_, size: 16, color: Colors.grey[600]),
+              const Icon(Icons.class_, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
-              Text(
-                schedule.kelas,
-                style: TextStyle(color: Colors.grey[600]),
-              ),
+              Text(schedule.kelas),
             ],
           ),
           const SizedBox(height: 4),
           Row(
             children: [
-              Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+              const Icon(Icons.location_on, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
-              Text(
-                schedule.ruangan,
-                style: TextStyle(color: Colors.grey[600]),
-              ),
+              Text(schedule.ruangan),
             ],
           ),
           const SizedBox(height: 4),
           Row(
             children: [
-              Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+              const Icon(Icons.access_time, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
-              Text(
-                '${schedule.formattedDate} • ${schedule.formattedTime}',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
+              Text('${schedule.formattedDate} • ${schedule.formattedTime}'),
             ],
           ),
           const SizedBox(height: 12),
@@ -488,7 +485,7 @@ class _LecturerScheduleCard extends StatelessWidget {
                         : Colors.grey,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
@@ -496,10 +493,11 @@ class _LecturerScheduleCard extends StatelessWidget {
               const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () {
-                  // In a real app, this would show attendance list
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Fitur daftar kehadiran akan segera tersedia'),
+                      content: Text(
+                        'Fitur daftar kehadiran akan segera tersedia',
+                      ),
                     ),
                   );
                 },
@@ -509,7 +507,7 @@ class _LecturerScheduleCard extends StatelessWidget {
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
